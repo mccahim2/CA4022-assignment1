@@ -1,0 +1,39 @@
+REGISTER /home/michael/Desktop/4th_Year_College/Data_at_Speed_Scale/pig-0.17.0/lib/piggybank.jar;
+
+
+DEFINE CSVExcelStorage org.apache.pig.piggybank.storage.CSVExcelStorage;
+
+##################################
+Load in and clean movies data set
+##################################
+
+movie = LOAD '/home/michael/Desktop/4th_Year_College/Data_at_Speed_Scale/ml-latest-small/movies.csv' USING CSVExcelStorage(',', 'NO_MULTILINE', 'UNIX')  AS (movieId: int, title: chararray, genres: chararray);
+
+
+movies_clean = FOREACH movie GENERATE movieId, SUBSTRING($1, 0,(int)SIZE($1) - 7) AS title, REGEX_EXTRACT($1, '([0-9][0-9][0-9][0-9])', 1) AS year,  STRSPLIT(genres, '\\|') as genres;
+
+###################################
+Load in and clean ratings data set
+###################################
+
+rating = LOAD '/home/michael/Desktop/4th_Year_College/Data_at_Speed_Scale/ml-latest-small/ratings.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',', 'NO_MULTILINE', 'UNIX')  AS (userId: int, movieId: int, rating: float, timestamp: int);
+
+
+rdata = foreach rating generate userId, movieId, rating, timestamp;
+
+
+###################################
+Join movies and ratings on movieId
+###################################
+
+joined_data = JOIN movies_clean by movieId, rdata by movieId;
+
+clean_data = FOREACH joined_data GENERATE $0 AS movieId, $1 AS title, $2 AS year, $3 AS genres, $4 AS userId, $6 AS rating, $7 AS timestamp;
+
+
+###############################
+Exporting data for use in Hive
+###############################
+
+STORE clean_data INTO '/home/michael/Desktop/4th_Year_College/Data_at_Speed_Scale/ml-latest-small/processed' USING CSVExcelStorage;
+

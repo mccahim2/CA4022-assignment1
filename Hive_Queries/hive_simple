@@ -1,0 +1,40 @@
+###################################################################
+Create an empty table in hive to populate with clean data from pig
+###################################################################
+
+CREATE TABLE movies (movieId INT, title STRING, year INT, genres STRING, userId INT, ratings INT, times INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+load data inpath 'input/clean_data.csv' into table movies;
+
+#####################################################################################
+What is the title of the movie with the highest number of ratings (top-rated movie)?
+#####################################################################################
+
+SELECT movieId, title, count(ratings) as no_ratings
+FROM movies
+GROUP by movieId
+ORDER by count(ratings) DESC
+LIMIT 5;
+
+
+#################################################################################################################################
+What is the title of the most liked movie (e.g. only 5 stars ratings OR only 4 and 5 star ratings OR majority of 5 star ratings)
+#################################################################################################################################
+
+(If the average rating == 5 then the movie is only rated 5 stars)
+
+SELECT movieId, title, AVG(rating) as avg_rating
+FROM movies
+where AVG(rating) == 5
+ORDER BY avg_rating
+GROUP BY movieId
+LIMIT 5;
+
+##################################################
+What is the User with the highest average rating?
+##################################################
+
+SELECT userId, AVG(rating) as avg_rating
+FROM movies
+GROUP BY userId
+ORDER BY avg_rating DESC
+LIMIT 5;

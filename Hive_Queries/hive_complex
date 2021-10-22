@@ -1,0 +1,21 @@
+####################################################################################################
+Count the number of ratings for each star level (How many 1 star ratings? ... How many 5* ratings?)
+####################################################################################################
+
+SELECT rating, COUNT(rating) as value_occurrence
+FROM movies
+GROUP BY rating;
+
+#################################
+What is the most popular rating?
+#################################
+
+SELECT rating, COUNT(rating) as value_occurrence
+FROM movies
+GROUP BY rating
+ORDER BY value_occurrence DESC
+LIMIT 1;
+
+######################################
+How are ratings distributed by genre?
+######################################

@@ -1,0 +1,45 @@
+#####################################################################################
+What is the title of the movie with the highest number of ratings (top-rated movie)?
+#####################################################################################
+
+count_ratings = GROUP clean_data by (movieId, title);
+count_ratings_final = FOREACH count_ratings GENERATE group.movieId, group.title, COUNT(clean_data) as number_ratings;
+sorted_count = ORDER count_ratings_final by number_ratings DESC;
+answer = limit sorted_count 5;
+dump answer;
+
+(Forest Gump, 329)
+See picture in folder for evidence
+
+
+#################################################################################################################################
+What is the title of the most liked movie (e.g. only 5 stars ratings OR only 4 and 5 star ratings OR majority of 5 star ratings)
+#################################################################################################################################
+
+(If the average == 5 then it is only rated 5 stars)
+
+movies = GROUP clean_data by movieId;
+average_ratings = FOREACH movies GENERATE FLATTEN (group) as movieId, clean_data.title, AVG(clean_data.rating) as average_rating, WHERE average_rating == 5.0;
+answer = FILTER average_ratings BY (average_rating == 5.0);
+dump answer;
+
+
+##################################################
+What is the User with the highest average rating?
+##################################################
+
+user = GROUP rdata by userId;
+average_ratings = FOREACH user GENERATE FLATTEN (group) as userId, AVG(rdata.rating) as average_rating, COUNT(rdata.rating) as no_ratings;
+average_rating_per_user = ORDER average_ratings by average_rating DESC, no_ratings DESC;
+answer = limit average_rating_per_user 5;
+dump answer;
+
+(53, 5.0, 20)
+See picture in folder for evidence
+
+
+####################
+Export cleaned data
+####################
+
+STORE clean_data INTO '/home/michael/Desktop/4th_Year_College/Data_at_Speed_Scale/ml-latest-small/processed' USING CSVExcelStorage;
